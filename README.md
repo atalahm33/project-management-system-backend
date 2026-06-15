@@ -83,7 +83,7 @@ project-management-system/
 ### 1. Clone the repository
 
 ```bash id="str2"
-git clone https://github.com/your-username/project-management-system.git
+git clone https://github.com/atalahm33/project-management-system
 ```
 
 ---
@@ -131,7 +131,7 @@ The system generates downloadable PDF reports that include project summaries, fi
 
 The frontend of this project is available at the following link:
 
-* https://your-frontend-link.com
+* https://github.com/atalahm33/project-management-system
 
 ---
 

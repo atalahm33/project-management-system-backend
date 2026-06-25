@@ -8,7 +8,7 @@ const fundingSourceSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-enum: ['حكومي', 'خاص', 'قرض', 'منحة'],
+enum: ['تمويل ذاتي','حكومي', 'خاص', 'قرض', 'منحة'],
     required: [true, 'Funding source must have a type']
   }
 }, {

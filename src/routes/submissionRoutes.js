@@ -22,11 +22,14 @@ router.post(
   submissionController.reviewSubmission,
 );
 
+const { uploadContractImages } = require("../middlewares/uploadMiddleware");
+
 // Financial Manager Routes
 ["contract", "expense", "funding", "transaction"].forEach((type) => {
   router.post(
     `/${type}`,
     authController.restrictTo("Admin", "Financial Manager"),
+    uploadContractImages,
     (req, res, next) => {
       req.params.type = type;
       next();
@@ -37,6 +40,7 @@ router.post(
   router.patch(
     `/${type}/:id`,
     authController.restrictTo("Admin", "Financial Manager"),
+    uploadContractImages,
     (req, res, next) => {
       req.params.type = type;
       next();
@@ -64,6 +68,20 @@ router.patch(
     next();
   },
   submissionController.updateSubmission,
+);
+
+router.delete(
+  "/:type/:id",
+  authController.restrictTo("Admin", "Financial Manager", "Engineering Manager"),
+  (req, res, next) => {
+    // Validate types
+    const allowed = ["contract", "expense", "funding", "transaction", "progress"];
+    if (!allowed.includes(req.params.type)) {
+      return res.status(400).json({ status: "fail", message: "Invalid submission type" });
+    }
+    next();
+  },
+  submissionController.deleteSubmission
 );
 
 module.exports = router;

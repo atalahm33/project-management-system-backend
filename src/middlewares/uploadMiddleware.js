@@ -7,35 +7,55 @@ const fs = require('fs');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = path.join(__dirname, '../../uploads/contracts');
+
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
+
     cb(null, uploadPath);
   },
+
   filename: function (req, file, cb) {
-    // contract-timestamp-random.ext
     const ext = path.extname(file.originalname);
-    cb(null, `contract-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+
+    cb(
+      null,
+      `contract-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`
+    );
   }
 });
 
-// Check file type
+// Allow Images + PDF
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
+  const allowedMimeTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp'
+  ];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new AppError('Not an image! Please upload only images.', 400), false);
+    cb(
+      new AppError(
+        'Only PDF, JPG, JPEG, PNG and WEBP files are allowed.',
+        400
+      ),
+      false
+    );
   }
 };
 
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage,
+  fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10 MB limit per file
+    fileSize: 50 * 1024 * 1024 // 10 MB per file
   }
 });
 
-// Export middleware to upload multiple images (max 10)
+// Upload multiple files (images + pdf) - max 10 files
 exports.uploadContractImages = upload.array('images', 10);

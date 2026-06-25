@@ -314,7 +314,7 @@ exports.getFundingSourcesStats = catchAsync(async (req, res, next) => {
   const fundingStats = await ProjectFunding.aggregate([
     {
       $group: {
-        _id: '$sourceName',
+        _id: { sourceName: '$sourceName', currency: '$currency' },
         projectsCount: { $addToSet: '$projectId' },
         totalCommitted: { $sum: '$committedAmount' },
         totalReceived: { $sum: '$receivedAmount' },
@@ -322,7 +322,8 @@ exports.getFundingSourcesStats = catchAsync(async (req, res, next) => {
     },
     {
       $project: {
-        sourceName: '$_id',
+        sourceName: '$_id.sourceName',
+        currency: { $ifNull: ['$_id.currency', 'EGP'] },
         projectsCount: { $size: '$projectsCount' },
         totalCommitted: 1,
         totalReceived: 1,

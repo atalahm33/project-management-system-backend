@@ -12,7 +12,7 @@ const projectFundingSchema = new mongoose.Schema({
   },
   sourceType: {
     type: String,
-    enum: ['حكومي', 'خاص', 'قرض', 'منحة'],
+    enum: ['تمويل ذاتي','حكومي', 'خاص', 'قرض', 'منحة'],
     required: [true, 'يجب تحديد نوع التمويل']
   },
   committedAmount: {

@@ -53,8 +53,23 @@ exports.createSubmission = catchAsync(async (req, res, next) => {
   const Model = models[type];
   if (!Model) return next(new AppError('Invalid submission type', 400));
 
+  const submissionData = { ...req.body };
+
+  // Parse JSON values if sent via FormData
+  if (typeof submissionData.values === 'string') {
+    try { submissionData.values = JSON.parse(submissionData.values); } catch (e) {}
+  }
+  if (typeof submissionData.paidAmounts === 'string') {
+    try { submissionData.paidAmounts = JSON.parse(submissionData.paidAmounts); } catch (e) {}
+  }
+
+  // Handle file uploads (images/pdfs)
+  if (req.files && req.files.length > 0) {
+    submissionData.images = req.files.map(file => `/uploads/contracts/${file.filename}`);
+  }
+
   const newSubmission = await Model.create({
-    ...req.body,
+    ...submissionData,
     createdBy: req.user._id,
     submissionStatus: 'pending_review'
   });
@@ -265,6 +280,12 @@ exports.updateSubmission = catchAsync(async (req, res, next) => {
     try { req.body.paidAmounts = JSON.parse(req.body.paidAmounts); } catch (e) { }
   }
 
+  // Handle file updates
+  if (req.files && req.files.length > 0) {
+    const newImages = req.files.map(file => `/uploads/contracts/${file.filename}`);
+    submission.images = [...(submission.images || []), ...newImages];
+  }
+
   Object.assign(submission, req.body);
   if (type === 'expense') {
     submission.currency = normalizeCurrency(req.body.currency || req.body.expenseCurrency || submission.currency);
@@ -277,5 +298,31 @@ exports.updateSubmission = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: submission
+  });
+});
+
+exports.deleteSubmission = catchAsync(async (req, res, next) => {
+  const { type, id } = req.params;
+  const Model = models[type];
+  if (!Model) return next(new AppError('Invalid submission type', 400));
+
+  const submission = await Model.findById(id);
+  if (!submission) return next(new AppError('Submission not found', 404));
+
+  // Authorized: Creator of the submission or Admin
+  if (submission.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'Admin') {
+    return next(new AppError('You are not authorized to delete this submission', 403));
+  }
+
+  // Submissions can be deleted unless they are already approved
+  if (submission.submissionStatus === 'approved') {
+    return next(new AppError('Approved submissions cannot be deleted', 400));
+  }
+
+  await Model.findByIdAndDelete(id);
+
+  res.status(204).json({
+    status: 'success',
+    data: null
   });
 });

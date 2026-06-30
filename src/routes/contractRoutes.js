@@ -24,6 +24,11 @@ router
     restrictTo("Admin", "Financial Manager"),
     uploadContractImages,
     contractController.updateContract,
+  )
+  .delete(
+    protect,
+    restrictTo("Admin", "Financial Manager"),
+    contractController.deleteContract
   );
 
 // Add supplementary contract route

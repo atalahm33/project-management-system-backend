@@ -295,3 +295,27 @@ exports.getContractTree = async (req, res, next) => {
 };
 
 // Existing exports remain unchanged
+
+// @desc    Delete a contract
+// @route   DELETE /api/contracts/:id
+// @access  Private (Admin, Financial Manager)
+exports.deleteContract = async (req, res, next) => {
+  try {
+    const contractId = req.params.id;
+    // Prevent deletion if it has sub-contracts
+    const hasSubcontracts = await Contract.findOne({ parentContractId: contractId });
+    if (hasSubcontracts) {
+      return next(new AppError('لا يمكن حذف هذا العقد لأنه يحتوي على عقود باطن مرتبطة به. يرجى حذف عقود الباطن أولاً.', 400));
+    }
+    const contract = await Contract.findByIdAndDelete(contractId);
+    if (!contract) {
+      return next(new AppError('No contract found with that ID', 404));
+    }
+    res.status(204).json({
+      status: 'success',
+      data: null
+    });
+  } catch (error) {
+    next(error);
+  }
+};

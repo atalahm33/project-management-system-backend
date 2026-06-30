@@ -47,6 +47,22 @@ const contractSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  startDate: {
+    type: Date,
+    default: null
+  },
+  startDateDescription: {
+    type: String,
+    default: ''
+  },
+  endDate: {
+    type: Date,
+    default: null
+  },
+  endDateDescription: {
+    type: String,
+    default: ''
+  },
   status: {
     type: String,
     enum: ['Draft','Under Review','Approved','Signed','Cancelled'],

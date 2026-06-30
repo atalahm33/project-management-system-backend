@@ -159,6 +159,10 @@ exports.reviewSubmission = catchAsync(async (req, res, next) => {
         images: submission.images,
         status: submission.status || 'Approved',
         description: submission.description,
+        startDate: submission.startDate,
+        startDateDescription: submission.startDateDescription,
+        endDate: submission.endDate,
+        endDateDescription: submission.endDateDescription,
         createdBy: submission.createdBy
       });
     } else if (type === 'expense') {
